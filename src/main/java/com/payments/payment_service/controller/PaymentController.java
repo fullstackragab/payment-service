@@ -4,6 +4,7 @@ import com.payments.payment_service.domain.AuditEntry;
 import com.payments.payment_service.domain.PaymentStatus;
 import com.payments.payment_service.dto.PaymentRequest;
 import com.payments.payment_service.dto.PaymentResponse;
+import com.payments.payment_service.external.ExchangeRateService;
 import com.payments.payment_service.repository.AuditRepository;
 import com.payments.payment_service.service.PaymentService;
 import jakarta.validation.Valid;
@@ -18,10 +19,13 @@ import java.util.List;
 public class PaymentController {
     private final PaymentService paymentService;
     private final AuditRepository auditRepository;
+    private final ExchangeRateService exchangeRateService;
 
-    public PaymentController(PaymentService paymentService, AuditRepository auditRepository) {
+    public PaymentController(PaymentService paymentService, AuditRepository auditRepository,
+                             ExchangeRateService exchangeRateService) {
         this.paymentService = paymentService;
         this.auditRepository = auditRepository;
+        this.exchangeRateService = exchangeRateService;
     }
 
 //    @GetMapping("/calculate")
@@ -29,6 +33,14 @@ public class PaymentController {
 //        BigDecimal total = paymentService.process(new BigDecimal(amount));
 //        return "Total charged: " + total;
 //    }
+
+    @GetMapping("/exchange-rate")
+    @ResponseStatus(HttpStatus.OK)
+    public String getRate(@RequestParam String from,
+                          @RequestParam String to) {
+        BigDecimal rate = exchangeRateService.getExchangeRate(from, to);
+        return from + " → " + to + " rate: " + rate.toPlainString();
+    }
 
     @GetMapping("/{id}/audit")
     @ResponseStatus(HttpStatus.OK)
